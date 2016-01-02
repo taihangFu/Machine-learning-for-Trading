@@ -36,8 +36,6 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
     df_order = pd.read_csv(orders_file, index_col='Date',
                 parse_dates=True, na_values=['nan'])
 
-    #print "dfssdfsdfsdfsfd", df_order
-
     orderList = list(set(df_order['Symbol']))
     #for symbol in df_order['Symbol']:
     for symbol in orderList: 
@@ -61,9 +59,6 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
 
     df_trades[:] = 0
 
-    #print "63fgdfgdfgfgdfg "
-    #print df_order
-    #print df_trades
     ############################### update df_trade ##############################################
     '''
     count = 0
@@ -109,11 +104,6 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
         df_trades.at[date, 'Cash'] = df_trades.at[date, 'Cash'] + (orders_row['Shares'] * price) # price change
         df_trades.at[date, orders_row['Symbol']] =  df_trades.at[date, orders_row['Symbol']] + order # order change
 
-        '''print 
-        print date
-        print df_trades.at[date, 'Cash']               
-        print
-        '''
     ##################################### df_holdings #######################################
     df_holdings = df_prices.copy(deep=True)
     df_holdings[:] = 0
