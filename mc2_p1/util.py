@@ -4,9 +4,15 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 
+'''
 def symbol_to_path(symbol, base_dir=os.path.join("..", "data")):
     """Return CSV file path given ticker symbol."""
     return os.path.join(base_dir, "{}.csv".format(str(symbol)))
+'''
+
+def symbol_to_path(symbol, base_dir="Documents/mc1_p1/data"):
+    """Return CSV file path given ticker symbol."""
+    return os.path.join(os.path.expanduser('~'),base_dir, "{}.csv".format(str(symbol)))
 
 
 def get_data(symbols, dates, addSPY=True):

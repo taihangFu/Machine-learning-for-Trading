@@ -32,46 +32,56 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
     
     df_prices = pd.DataFrame(index=dates)
 
-    #read symbol in order file
+    # read symbol in order file
     df_order = pd.read_csv(orders_file, index_col='Date',
                 parse_dates=True, na_values=['nan'])
 
     #print "dfssdfsdfsdfsfd", df_order
 
-    for symbol in df_order['Symbol']: 
-        if not symbol in df_prices.columns: 
-            #add new empty colomns for each symbol
+    orderList = list(set(df_order['Symbol']))
+    #for symbol in df_order['Symbol']:
+    for symbol in orderList: 
+        # if not symbol in df_prices.columns: 
+            # add new empty colomns for each symbol
             df_temp = pd.read_csv(symbol_to_path(symbol), index_col='Date',
                 parse_dates=True, usecols=['Date', 'Adj Close'], na_values=['nan'])
             df_temp = df_temp.rename(columns={'Adj Close': symbol})
             df_prices = df_prices.join(df_temp)
-
     
-    df_prices = df_prices.dropna() #drop all rows that have any NaN values
-    #print df_prices
+    
+    df_prices = df_prices.dropna() # drop all rows that have any NaN values
 
     #df_prices = pd.concat([df_prices, pd.DataFrame(columns=['Cash'])]) #add cash column
     df_prices['Cash'] = 1.0
-    #print "53xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", df_prices
+
     
     #initialize df_trade
-    #df_trades = df_prices     #assign by reference????
+    #df_trades = df_prices     # assign by reference????
     df_trades = df_prices.copy(deep=True)
 
     df_trades[:] = 0
+
+    #print "63fgdfgdfgfgdfg "
+    #print df_order
     #print df_trades
-    
-    ########## update df_trade
+    ############################### update df_trade ##############################################
+    '''
+    count = 0
     for date, trade_row in df_trades.iterrows():
+        if count < 13:
+            #print "699dsfsdfsdffssdf "
+            #print date
+            count+=1
 
         if date in df_order.index:
+            print
+            print "75555fdgdgfg"
+            print date
+            print
             #df_temp = df_order.ix[date.strftime('%Y%m%d'):date.strftime('%Y%m%d')]
             df_temp = df_order[(df_order.index == date)]
-            #print "755555555555555 ", df_temp.index
+            #print df_temp
 
-            #print type(df_order), "766666", type(df_temp)
-
-            #print "72222 ", date,  df_temp
             for _, order_trade_row in df_temp.iterrows():
                 # assume there might be same stock buying multiple times???
                 # update #shares
@@ -81,32 +91,64 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
                 if order_trade_row['Order'] == 'BUY':
                     order = -1 * order_trade_row['Shares']  
                 else:
+                    trade_row[order_trade_row['Symbol']] = trade_row[order_trade_row['Symbol']] * -1
                     order = order_trade_row['Shares']
 
-                #print "79xxxxxxxxxxxxxxxxxxxxx", df_prices.at[date ,order_trade_row['Symbol']]
                 trade_row['Cash'] =  (order * df_prices.at[date, order_trade_row['Symbol']]) + trade_row['Cash']
+    '''
+    for date, orders_row in df_order.iterrows():
+        #update 
+        price = df_prices.at[date, orders_row['Symbol']]
+        order = orders_row['Shares']
+    
+        if orders_row['Order'] == 'BUY':
+            price = price * -1 #lose Cash when Buy stock
+        else:   
+            order = order * -1 #lose order when Sell stock
 
-        #print df_trades,"89xxxxxxxxxxxxx"  
+        df_trades.at[date, 'Cash'] = df_trades.at[date, 'Cash'] + (orders_row['Shares'] * price) # price change
+        df_trades.at[date, orders_row['Symbol']] =  df_trades.at[date, orders_row['Symbol']] + order # order change
 
+        '''print 
+        print date
+        print df_trades.at[date, 'Cash']               
+        print
+        '''
+    ##################################### df_holdings #######################################
     df_holdings = df_prices.copy(deep=True)
     df_holdings[:] = 0
-    df_holdings.at[start_date, 'Cash'] = start_val #initialize for the start day's CASH
-    print "92xxxxxxxxdfgdgdfgfdgdfgdfgdgdfgdfgsdadavcxvbvb", df_holdings
+    df_holdings.at[start_date, 'Cash'] = start_val  #initialize for the start day's CASH
 
     first_trade = True
     for date, holdings_row in df_holdings.iterrows(): 
         #print "98cccccccc", df_trades[(df_trades.index == date)] + df_holdings[(df_holdings.index == date)] + df_holdings[(df_holdings.index == date)]
         
         if first_trade: # skip first day trade
+            df_result = df_holdings.loc[[df_holdings.index.get_loc(date)]].values + df_trades.loc[[df_trades.index.get_loc(date)]].values
+            df_holdings.loc[[df_holdings.index.get_loc(date)], :] = df_result
+
             first_trade = False
             continue
+        
 
         #df_holdings[(df_holdings.index == date)] = df_holdings[(df_holdings.index == date-timedelta(days=1))] + df_trades[(df_trades.index == date-timedelta(days=1))]
-        print "99csdfsdfsdsdsdsdffsd " ,df_holdings[(df_holdings.index == date-timedelta(days=1))]  
+        #print "99csdfsdfsdsdsdsdffsd " ,df_holdings.index.get_loc(date)  # get interger location!!!!!!!!!!
+        #print "99csdfsdfsdsdsdsdffsd " ,df_holdings.loc[[df_holdings.index.get_loc(date) - 1]]  # get interger location!!!!!!!!!!
+        #print "110 csdfsdfsdsdsdsdffsd " , df_holdings.loc[[df_holdings.index.get_loc(date) - 1]], df_trades.loc[[df_trades.index.get_loc(date)]]
+
+        #print "112 csdfsdfsdsdsdsdffsd " , df_holdings.loc[[df_holdings.index.get_loc(date) - 1]].values , df_trades.loc[[df_trades.index.get_loc(date)]].values
+        df_result = df_holdings.loc[[df_holdings.index.get_loc(date) - 1]].values + df_trades.loc[[df_trades.index.get_loc(date)]].values
+        #print "113dsfsdffd ", df_result
+        df_holdings.loc[[df_holdings.index.get_loc(date)], :] = df_result
+    
+    df_values = df_prices * df_holdings
+    
+    portvals = df_values.sum(axis=1)
+    print "120dfsdfsdf "
+    print portvals
+
+    #print "117 dasfsdfsfdf ", df_holdings
     return portvals
-
-
-
 
 def test_run():
     """Driver function."""
