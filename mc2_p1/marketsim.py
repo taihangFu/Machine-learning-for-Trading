@@ -93,6 +93,11 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
     '''
     for date, orders_row in df_order.iterrows():
         #update 
+        print
+        print type(date)
+        print date
+        print
+
         price = df_prices.at[date, orders_row['Symbol']]
         order = orders_row['Shares']
     
@@ -134,8 +139,8 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
     df_values = df_prices * df_holdings
     
     portvals = df_values.sum(axis=1)
-    print "120dfsdfsdf "
-    print portvals
+
+    #print portvals
 
     #print "117 dasfsdfsfdf ", df_holdings
     return portvals
@@ -143,10 +148,10 @@ def compute_portvals(start_date, end_date, orders_file, start_val):
 def test_run():
     """Driver function."""
     # Define input parameters
-    start_date = '2011-01-05'
-    end_date = '2011-01-20'
-    orders_file = os.path.join("orders", "orders-short.csv")
-    start_val = 1000000
+    start_date = '2007-12-31'
+    end_date = '2009-12-31'
+    orders_file = os.path.join("orders", "orders-bollinger.csv")
+    start_val = 10000
 
     # Process orders
     portvals = compute_portvals(start_date, end_date, orders_file, start_val)

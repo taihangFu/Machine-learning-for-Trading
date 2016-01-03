@@ -175,11 +175,16 @@ def test_run():
             print
             print "Long entries ", date," ", day_row.at['IBM'] 
             print
-            df_orders.at[date, 'Order'] = 'BUY'
-            df_orders.at[date, 'Shares'] = 100
+
+            #trading_date = date + timedelta(days=1)
+            trading_date = df.index[df.index.get_loc(date) + 1]
 
 
-            plt.axvline(date + timedelta(days=1), color='green')
+            df_orders.at[trading_date, 'Order'] = 'BUY'
+            df_orders.at[trading_date, 'Shares'] = 100
+
+
+            plt.axvline(trading_date, color='green')
 
         elif (has_long_position == True) and (prev_day_stock_price < prev_day_rolling_average_value) and (next_day_rolling_average_value < next_day_stock_price):
             # Long exsits Signal
@@ -187,10 +192,14 @@ def test_run():
             print
             print "Long exsits ", date," ", day_row.at['IBM'] 
             print
-            df_orders.at[date, 'Order'] = 'SELL'
-            df_orders.at[date, 'Shares'] = 100
 
-            plt.axvline(date + timedelta(days=1), color='black')
+            trading_date = df.index[df.index.get_loc(date) + 1]
+
+
+            df_orders.at[trading_date, 'Order'] = 'SELL'
+            df_orders.at[trading_date, 'Shares'] = 100
+
+            plt.axvline(trading_date, color='black')
 
         elif (has_short_position == False) and (prev_day_stock_price > prev_day_upper_band_value) and (next_day_upper_band_value >  next_day_stock_price):
             # Short entries Signal
@@ -206,13 +215,16 @@ def test_run():
             print next_day_upper_band_value
             print
             '''
-            df_orders.at[date, 'Order'] = 'SELL'
-            df_orders.at[date, 'Shares'] = 100
+            trading_date = df.index[df.index.get_loc(date) + 1]
+
+            df_orders.at[trading_date, 'Order'] = 'SELL'
+            df_orders.at[trading_date, 'Shares'] = 100
             print
-            print "Short entries ", date," ", day_row.at['IBM']            
-            print date + timedelta(days=1)
+            print "Short entries ", date," ", day_row.at['IBM'] 
+            print trading_date
             print
-            plt.axvline(date + timedelta(days=1), color='red')
+            
+            plt.axvline(trading_date, color='red')
 
 
 
@@ -220,12 +232,14 @@ def test_run():
             # Short exsits Signal
             has_short_position = False
 
-            df_orders.at[date, 'Order'] = 'BUY'
-            df_orders.at[date, 'Shares'] = 100
+            trading_date = df.index[df.index.get_loc(date) + 1]
+            
+            df_orders.at[trading_date, 'Order'] = 'BUY'
+            df_orders.at[trading_date, 'Shares'] = 100
             print
             print "Short exsits ", date," ", day_row.at['IBM'] 
             print
-            plt.axvline(date + timedelta(days=1), color='black')
+            plt.axvline(trading_date, color='black')
 
    
     df_orders = df_orders[df_orders['Shares'] != 'NaN']
