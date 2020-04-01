@@ -4,7 +4,7 @@ Introduction: https://www.udacity.com/course/machine-learning-for-trading--ud501
 
 Project's description, Syllabus and other information: http://quantsoftware.gatech.edu/Machine_Learning_for_Trading_Course
 
-have basically completed MC1-Project 1, MC2-Project 1 and MC2-Project 2, might need more testing
+Completed MC1-Project 1, MC2-Project 1 and MC2-Project 2, might need more testing
 
 Assignments
 [MC1-Project-1: Assess portfolio]
